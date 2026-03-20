@@ -1,0 +1,221 @@
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Header, TextInput } from '../components';
+import { fontFamilyBold } from '../modules/themes';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const STORAGE_KEY = 'chargeAlert';
+
+const EvChargingTimeAlert = () => {
+  const [currentBattery, setCurrentBattery] = useState('');
+  const [hours, setHours] = useState('');
+  const [minutes, setMinutes] = useState('');
+
+  const [liveBattery, setLiveBattery] = useState<number | null>(null);
+  const [remainingTime, setRemainingTime] = useState('');
+
+  // 🚀 START CHARGING
+  const startCharging = async () => {
+  const initial = Number(currentBattery);
+  const totalMinutes = Number(hours) * 60 + Number(minutes);
+
+  if (initial <= 0 || initial >= 100 || totalMinutes <= 0) {
+    return;
+  }
+
+  const data = {
+    startTime: Date.now(),
+    initialBattery: initial,
+    totalMinutes,
+  };
+
+  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+  calculateLive(data); // immediate update
+};
+
+  // 🔥 REAL CALCULATION
+const calculateLive = (data: any) => {
+  const now = Date.now();
+
+  const elapsedMinutes = Math.max(
+    0,
+    (now - data.startTime) / 60000
+  );
+
+  const remainingPercent = 100 - data.initialBattery;
+  const rate = remainingPercent / data.totalMinutes;
+
+  let battery =
+    data.initialBattery + rate * elapsedMinutes;
+
+  // clamp
+  if (battery > 100) battery = 100;
+  if (battery < data.initialBattery) battery = data.initialBattery;
+
+  const remainingMinutes = Math.max(
+    0,
+    data.totalMinutes - elapsedMinutes
+  );
+
+  setLiveBattery(battery);
+
+  if (battery >= 100) {
+    setRemainingTime('Fully Charged');
+  } else {
+    const hrs = Math.floor(remainingMinutes / 60);
+    const mins = Math.floor(remainingMinutes % 60);
+
+    setRemainingTime(`${hrs}h ${mins}m left`);
+  }
+};
+
+  // 🔄 LOAD + LIVE UPDATE
+  useEffect(() => {
+    let interval: any;
+
+    const init = async () => {
+      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+
+      if (stored) {
+        const data = JSON.parse(stored);
+
+        calculateLive(data);
+
+        // update every 5 sec
+        interval = setInterval(() => {
+          calculateLive(data);
+        }, 5000);
+      }
+    };
+
+    init();
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <Header label="Charge Time Alert" />
+
+      <View style={styles.content}>
+
+        <TextInput
+          label="Current Battery %"
+          value={currentBattery}
+          placeholder="20"
+          onChangeText={setCurrentBattery}
+          keyboardType="numeric"
+        />
+
+        <View style={styles.row}>
+          <TextInput
+            label="Hours"
+            value={hours}
+            placeholder="3"
+            onChangeText={setHours}
+            keyboardType="numeric"
+            style={styles.input}
+          />
+
+          <TextInput
+            label="Minutes"
+            value={minutes}
+            placeholder="0"
+            onChangeText={setMinutes}
+            keyboardType="numeric"
+            style={styles.input}
+          />
+        </View>
+
+        <TouchableOpacity style={styles.button} onPress={startCharging}>
+          <Text style={styles.buttonText}>Start Charging</Text>
+        </TouchableOpacity>
+
+        {/* LIVE RESULT */}
+        {liveBattery !== null && (
+          <View style={styles.resultBox}>
+            <Text style={styles.resultText}>
+              Battery: {liveBattery.toFixed(1)}%
+            </Text>
+
+            <Text style={styles.resultText}>
+              {remainingTime}
+            </Text>
+
+            {/* Progress Bar */}
+            <View style={styles.progressContainer}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: `${liveBattery}%` },
+                ]}
+              />
+            </View>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+};
+
+export default EvChargingTimeAlert;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  content: {
+    padding: 16,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 10,
+    justifyContent: 'space-around',
+  },
+  input: {
+    width: 100,
+  },
+  button: {
+    marginTop: 20,
+    backgroundColor: '#16A34A',
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: fontFamilyBold,
+  },
+  resultBox: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 10,
+  },
+  resultText: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  progressContainer: {
+    height: 10,
+    backgroundColor: '#ddd',
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginTop: 10,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#16A34A',
+  },
+});

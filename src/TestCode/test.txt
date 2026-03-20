@@ -1,0 +1,17 @@
+import { StyleSheet, Text, View } from 'react-native'
+import React from 'react'
+import { fontFamily } from './src/modules/themes'
+import { Icon } from './src/components'
+
+const App = () => {
+  return (
+    <View>
+      <Text style={{fontFamily,fontSize:50}}>App</Text>
+      <Icon name='home' type='AntDesign' size={60} color='red'/>
+    </View>
+  )
+}
+
+export default App
+
+const styles = StyleSheet.create({})
