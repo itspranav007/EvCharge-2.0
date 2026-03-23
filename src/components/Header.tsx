@@ -28,7 +28,7 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <SafeAreaView
       style={{
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.primary,
         paddingHorizontal: 10,
         paddingVertical: 8,
         gap: 5,
@@ -92,14 +92,16 @@ const Header: React.FC<HeaderProps> = ({
         style={{
           flex: 1,
           alignItems: 'center',
-          fontSize:16,
-          color: Colors.primary,
+          fontSize:18,
+          color: Colors.white,
           fontFamily:fontFamilyBold,
           
         }}>
         {label}
       </Text>
+      
     </SafeAreaView>
+    
   );
 };
 export default Header;

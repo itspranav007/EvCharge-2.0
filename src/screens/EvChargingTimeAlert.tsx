@@ -1,105 +1,127 @@
 import {
+  NativeModules,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useRef  } from 'react';
 import { Header, TextInput } from '../components';
 import { fontFamilyBold } from '../modules/themes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const STORAGE_KEY = 'chargeAlert';
+const STORAGE_KEY = 'timerAlert';
+const { AlarmModule } = NativeModules;
+
+
+
 
 const EvChargingTimeAlert = () => {
-  const [currentBattery, setCurrentBattery] = useState('');
+    const intervalRef = useRef<any>(null);
+
   const [hours, setHours] = useState('');
   const [minutes, setMinutes] = useState('');
-
-  const [liveBattery, setLiveBattery] = useState<number | null>(null);
   const [remainingTime, setRemainingTime] = useState('');
 
-  // 🚀 START CHARGING
-  const startCharging = async () => {
-  const initial = Number(currentBattery);
+  // 🚀 START TIMER
+
+const startTimer = async () => {
+  // ✅ clear old timer
+  if (intervalRef.current) {
+    clearInterval(intervalRef.current);
+  }
+
+  setRemainingTime(''); // reset UI
+
   const totalMinutes = Number(hours) * 60 + Number(minutes);
 
-  if (initial <= 0 || initial >= 100 || totalMinutes <= 0) {
+  if (isNaN(totalMinutes) || totalMinutes <= 0) {
+    alert('Enter valid time');
     return;
   }
 
-  const data = {
-    startTime: Date.now(),
-    initialBattery: initial,
-    totalMinutes,
-  };
+
+  if (totalMinutes <= 0.2) {
+    setRemainingTime('Time Completed');
+    return;
+  }
+
+  const endTime = Date.now() + totalMinutes * 60 * 1000;
+
+  const data = { endTime };
 
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+AlarmModule.showChargingNotification();
+  AlarmModule.setAlarm(endTime);
 
-  calculateLive(data); // immediate update
+
+  // ✅ start new interval
+  intervalRef.current = setInterval(() => {
+    updateTimer(data);
+  }, 1000);
+
+  updateTimer(data);
 };
 
-  // 🔥 REAL CALCULATION
-const calculateLive = (data: any) => {
+  // 🔥 COUNTDOWN LOGI
+const updateTimer = (data: any) => {
   const now = Date.now();
+  const remainingMs = data.endTime - now;
 
-  const elapsedMinutes = Math.max(
-    0,
-    (now - data.startTime) / 60000
-  );
+  if (remainingMs <= 0) {
+    setRemainingTime('Time Completed');
 
-  const remainingPercent = 100 - data.initialBattery;
-  const rate = remainingPercent / data.totalMinutes;
+    // ✅ stop interval when done
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
 
-  let battery =
-    data.initialBattery + rate * elapsedMinutes;
-
-  // clamp
-  if (battery > 100) battery = 100;
-  if (battery < data.initialBattery) battery = data.initialBattery;
-
-  const remainingMinutes = Math.max(
-    0,
-    data.totalMinutes - elapsedMinutes
-  );
-
-  setLiveBattery(battery);
-
-  if (battery >= 100) {
-    setRemainingTime('Fully Charged');
-  } else {
-    const hrs = Math.floor(remainingMinutes / 60);
-    const mins = Math.floor(remainingMinutes % 60);
-
-    setRemainingTime(`${hrs}h ${mins}m left`);
+    return;
   }
+
+  const totalSeconds = Math.floor(remainingMs / 1000);
+
+  const hrs = Math.floor(totalSeconds / 3600);
+  const mins = Math.floor((totalSeconds % 3600) / 60);
+  const secs = totalSeconds % 60;
+
+  let timeString = '';
+
+  if (hrs > 0) {
+    timeString = `${hrs}h ${mins}m ${secs}s`;
+  } else if (mins > 0) {
+    timeString = `${mins}m ${secs}s`;
+  } else {
+    timeString = `${secs}s`;
+  }
+
+  setRemainingTime(timeString);
 };
 
   // 🔄 LOAD + LIVE UPDATE
-  useEffect(() => {
-    let interval: any;
+useEffect(() => {
+  const init = async () => {
+    const stored = await AsyncStorage.getItem(STORAGE_KEY);
 
-    const init = async () => {
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const data = JSON.parse(stored);
 
-      if (stored) {
-        const data = JSON.parse(stored);
+      updateTimer(data);
 
-        calculateLive(data);
+      intervalRef.current = setInterval(() => {
+        updateTimer(data);
+      }, 1000);
+    }
+  };
 
-        // update every 5 sec
-        interval = setInterval(() => {
-          calculateLive(data);
-        }, 5000);
-      }
-    };
+  init();
 
-    init();
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, []);
+  return () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+  };
+}, []);
 
   return (
     <View style={styles.container}>
@@ -107,60 +129,42 @@ const calculateLive = (data: any) => {
 
       <View style={styles.content}>
 
-        <TextInput
-          label="Current Battery %"
-          value={currentBattery}
-          placeholder="20"
-          onChangeText={setCurrentBattery}
-          keyboardType="numeric"
-        />
-
         <View style={styles.row}>
           <TextInput
             label="Hours"
             value={hours}
-            placeholder="3"
+            placeholder="1"
             onChangeText={setHours}
             keyboardType="numeric"
             style={styles.input}
+             maxLength={2}
+
           />
 
           <TextInput
             label="Minutes"
             value={minutes}
-            placeholder="0"
+            placeholder="30"
             onChangeText={setMinutes}
             keyboardType="numeric"
             style={styles.input}
+              maxLength={3}
           />
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={startCharging}>
-          <Text style={styles.buttonText}>Start Charging</Text>
+        <TouchableOpacity style={styles.button} onPress={startTimer}>
+          <Text style={styles.buttonText}>Start Timer</Text>
         </TouchableOpacity>
 
-        {/* LIVE RESULT */}
-        {liveBattery !== null && (
+        {/* Countdown */}
+        {remainingTime !== '' && (
           <View style={styles.resultBox}>
-            <Text style={styles.resultText}>
-              Battery: {liveBattery.toFixed(1)}%
-            </Text>
-
-            <Text style={styles.resultText}>
+            <Text style={styles.timerText}>
               {remainingTime}
             </Text>
-
-            {/* Progress Bar */}
-            <View style={styles.progressContainer}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${liveBattery}%` },
-                ]}
-              />
-            </View>
           </View>
         )}
+
       </View>
     </View>
   );
@@ -180,10 +184,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     marginTop: 10,
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
   },
   input: {
-    width: 100,
+    width: 150,
   },
   button: {
     marginTop: 20,
@@ -199,23 +203,17 @@ const styles = StyleSheet.create({
   },
   resultBox: {
     marginTop: 20,
-    padding: 16,
+    padding: 20,
     backgroundColor: '#F1F5F9',
     borderRadius: 10,
+    alignItems: 'center',
   },
-  resultText: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  progressContainer: {
-    height: 10,
-    backgroundColor: '#ddd',
-    borderRadius: 10,
-    overflow: 'hidden',
-    marginTop: 10,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#16A34A',
+  timerText: {
+    fontSize: 22,
+    fontFamily: fontFamilyBold,
   },
 });
+
+function alert(arg0: string) {
+  throw new Error('Function not implemented.');
+}

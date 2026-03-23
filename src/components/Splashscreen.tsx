@@ -37,7 +37,7 @@ const Splashscreen: React.FC<SplashscreenProps> = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-      navigation.navigate(screenname);
+      navigation.replace(screenname);
     }, time);
 
     return () => clearTimeout(timer);
