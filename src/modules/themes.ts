@@ -22,6 +22,7 @@ type colorTheme = {
   onBack: string;
   buttonbackground: string;
   textColor: string;
+  lGreen: string;
 };
 
 const LightTheme: colorTheme = {
@@ -79,6 +80,7 @@ export const useTheme = () =>
 
 export const Colors: colorTheme = {
   primary: '#0AB051',
+  lGreen: '#DCFCE7',
   primary2: '#021F0E',
   background: '#Ffff',
   text: '#000000',
@@ -137,7 +139,7 @@ export const GlobalStyle = StyleSheet.create({
   },
   errorMessage: {
     fontFamily: fontFamily,
-    fontSize: Size.sm,
+    fontSize: 12,
     left: Size.sm,
   },
   field: {

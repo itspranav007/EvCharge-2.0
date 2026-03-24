@@ -36,6 +36,33 @@ class AlarmModule(reactContext: ReactApplicationContext) :
         )
     }
 
+@ReactMethod
+fun stopAlarm() {
+
+    val context = reactApplicationContext
+
+    val intent = Intent(context, AlarmReceiver::class.java)
+
+    val pendingIntent = PendingIntent.getBroadcast(
+        context,
+        1001,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    val alarmManager =
+        context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+    alarmManager.cancel(pendingIntent)
+
+    // 🔥 remove notification
+    val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    notificationManager.cancelAll()
+}
+
+
     @ReactMethod
     fun showChargingNotification() {
 
