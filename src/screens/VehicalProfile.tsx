@@ -1,10 +1,15 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import { Header } from '../components'
 
 const VehicalProfile = () => {
   return (
     <View>
-      <Text>VehicalProfile</Text>
+      <Header label="Vehicle Profile" />
+
+      <View>
+
+      </View>
     </View>
   )
 }

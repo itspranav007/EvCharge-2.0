@@ -19,7 +19,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         type="Feather"
         name="search"
         size={20}
-        color="#007AFF"
+        color="gray"
         style={styles.icon}
       />
       <TextInput
@@ -45,13 +45,14 @@ const styles = StyleSheet.create({
     paddingVertical:2,
     alignItems: 'center',
     borderColor: '#d1d1d6',
-    borderWidth: 1,
+    borderWidth:0.0,
     width: '100%',
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 3,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 10,
+    marginBottom: 16,
   },
   icon: {
     marginRight: 8,

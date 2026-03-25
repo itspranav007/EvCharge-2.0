@@ -12,6 +12,7 @@ import { Header, Icon, TextInput } from '../components';
 import { Colors, fontFamilyBold } from '../modules/themes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Animated, Easing } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const evcarlog = require('../assets/images/evcar.png');
 
@@ -19,6 +20,10 @@ const STORAGE_KEY = 'timerAlert';
 const { AlarmModule } = NativeModules;
 
 const EvChargingTimeAlert = () => {
+
+  const navigation = useNavigation();
+
+
   const intervalRef = useRef<any>(null);
   const animatedWidth = useRef(new Animated.Value(0)).current;
 
@@ -73,18 +78,28 @@ const EvChargingTimeAlert = () => {
     updateTimer(data);
   };
 
-  const resetTimer = async () => {
-    seterror(false);
+const resetTimer = async () => {
+  seterror(false);
 
-    setRemainingTime('00:00:00'); // reset UI
+  setRemainingTime('00:00:00');
 
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-    await AsyncStorage.removeItem(STORAGE_KEY);
-    AlarmModule.stopAlarm();
-  };
 
+  if (intervalRef.current) {
+    clearInterval(intervalRef.current);
+    intervalRef.current = null;
+  }
+
+  await AsyncStorage.removeItem(STORAGE_KEY);
+
+
+  AlarmModule.stopAlarm();
+
+  //To Stop Animation
+  shineAnim.stopAnimation();
+  shineAnim.setValue(0);
+  animatedWidth.stopAnimation();
+  animatedWidth.setValue(0);
+};
   // 🔥 COUNTDOWN LOGI
   const updateTimer = (data: any) => {
     const now = Date.now();
@@ -130,6 +145,7 @@ const EvChargingTimeAlert = () => {
       easing: Easing.linear,
       useNativeDriver: false,
     }).start();
+
   };
 
   const shineAnim = useRef(new Animated.Value(0)).current;
@@ -144,6 +160,9 @@ const EvChargingTimeAlert = () => {
         useNativeDriver: true,
       }),
     ).start();
+
+
+
 
     // 🔄 LOAD TIMER
     const init = async () => {
@@ -168,6 +187,8 @@ const EvChargingTimeAlert = () => {
         clearInterval(intervalRef.current);
       }
     };
+
+const screen = NativeModules?.InitialIntent?.screen;
   }, []);
 
   const translateX = shineAnim.interpolate({
@@ -177,7 +198,8 @@ const EvChargingTimeAlert = () => {
 
   return (
     <View style={styles.container}>
-      <Header label="Charge Time Alert" />
+            <Header label="Charge Time Alert" onBack={() => navigation.goBack()} />
+
 
       <View style={styles.content}>
         <View style={{ width: '100%', height: 210, alignItems: 'center', backgroundColor: Colors.lGreen ,borderRadius:16}}>
@@ -228,7 +250,7 @@ const EvChargingTimeAlert = () => {
             onPress={resetTimer}
           >
             <Text style={styles.buttonText}>Reset</Text>
-          </TouchableOpacity>{' '}
+          </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={startTimer}>
             <Text style={styles.buttonText}>Start Timer</Text>
           </TouchableOpacity>
@@ -403,14 +425,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginTop: 15,
     overflow: 'hidden',
-    borderColor: '#9e9e9e',
-    borderWidth: 2,
+    borderColor: '#000',
+    borderWidth:1.5,
   },
 
   batteryFill: {
     height: '100%',
-    backgroundColor: '#22c55e', // brighter green
-   
+    backgroundColor: '#22c55e', 
     borderTopRightRadius:14,
     borderBottomRightRadius:14,
   },

@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const ServiceCenter = () => {
+const EvNews = () => {
   return (
     <View>
-      <Text>ServiceCenter</Text>
+      <Text>EvNews</Text>
     </View>
   )
 }
 
-export default ServiceCenter
+export default EvNews
 
 const styles = StyleSheet.create({})

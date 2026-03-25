@@ -9,9 +9,7 @@ import {
 } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { Colors, fontFamily,fontFamilyBold } from '../modules/themes';
-import Version from './Version';
 
-import DeviceInfo from 'react-native-device-info';
 
 interface SplashscreenProps {
   Logoimage: ImageSourcePropType;
@@ -33,7 +31,6 @@ const Splashscreen: React.FC<SplashscreenProps> = ({
   const navigation = useNavigation<NavigationProp<any>>();
   const [loading, setLoading] = useState(true);
 
-  const versionName = DeviceInfo.getVersion();
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -49,14 +46,13 @@ const Splashscreen: React.FC<SplashscreenProps> = ({
         {/* Dark overlay */}
        
           <View style={styles.centerContent}>
-            <Image source={Logoimage} resizeMode="contain" style={styles.image} />
-            <Text style={styles.title}>{title}</Text>
+          
+            <Image source={Logoimage} resizeMode="cover" style={styles.image} height={400} width={390} />
+              <Text style={styles.title}>{title}</Text>
             <Text style={styles.subtitle}>{Subtitle}</Text>
           </View>
           
-          <View style={{justifyContent:"flex-end"}}>
-            <Version versionCode={versionName} colorname={Colors.primary2}  />
-          </View>    
+            
     
     </View>
   );
@@ -67,8 +63,8 @@ export default Splashscreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    // justifyContent: 'center',
+    // alignItems: 'center',
     backgroundColor: Colors.background, // ✅ Dark background 
   },
  
@@ -78,16 +74,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   image: {
-    width: 300,
-    height: 300,
-    marginBottom: 20,
+    marginBottom:20,
+    // backgroundColor:'red'
+    
    
   },
   title: {
-    fontSize: 30,
+    fontSize:50,
     color: Colors.primary, // ✅ Dark background, white text
     fontFamily: fontFamilyBold,
     letterSpacing: 1,
+  
   },
   subtitle: {
     fontSize: 17,

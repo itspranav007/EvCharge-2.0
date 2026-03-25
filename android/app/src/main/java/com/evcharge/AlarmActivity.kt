@@ -1,13 +1,17 @@
 package com.evcharge
 
 import android.app.Activity
+import android.app.NotificationManager
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.view.Gravity
 import android.view.WindowManager
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.app.NotificationManager
+import android.widget.*
+import android.graphics.Color
+import android.graphics.Typeface
+import androidx.core.content.res.ResourcesCompat
+import java.text.SimpleDateFormat
+import java.util.*
 
 class AlarmActivity : Activity() {
 
@@ -19,55 +23,93 @@ class AlarmActivity : Activity() {
         window.addFlags(
             WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
                     WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
         )
 
-        // 🔊 Start sound
+        // 🔊 Alarm sound
         mediaPlayer = MediaPlayer.create(this, R.raw.alarm)
         mediaPlayer?.isLooping = true
         mediaPlayer?.start()
 
-        // ✅ ROOT LAYOUT
-        val layout = LinearLayout(this)
-        layout.orientation = LinearLayout.VERTICAL
-        layout.gravity = android.view.Gravity.CENTER // 🔥 CENTER CONTENT
-        layout.setBackgroundColor(android.graphics.Color.BLACK) // optional (better UI)
+        // ✅ Load Fonts
+        val boldFont = ResourcesCompat.getFont(this, R.font.bold)
+        val regularFont = ResourcesCompat.getFont(this, R.font.bold)
 
-        // 🔤 TEXT
-        val text = TextView(this)
-        text.text = "⏰ Alarm Ringing"
-        text.textSize = 26f
-        text.setTextColor(android.graphics.Color.WHITE)
-        text.gravity = android.view.Gravity.CENTER
+        // 🔲 ROOT
+        val root = LinearLayout(this)
+        root.orientation = LinearLayout.VERTICAL
+        root.gravity = Gravity.CENTER
+        root.setBackgroundColor(Color.WHITE)
+        root.setPadding(40, 60, 40, 60)
 
-        val textParams = LinearLayout.LayoutParams(
+        // 🔤 TITLE
+        val title = TextView(this)
+        title.text = "⚡ EV Charging Complete"
+        title.textSize = 20f
+        title.setTextColor(Color.parseColor("#16a34a"))
+        title.gravity = Gravity.CENTER
+        title.typeface = boldFont
+
+        // ⏰ TIME (BIG)
+        val time = TextView(this)
+        val currentTime = SimpleDateFormat("hh:mm", Locale.getDefault()).format(Date())
+        time.text = currentTime
+        time.textSize = 64f
+        time.setTextColor(Color.BLACK)
+        time.gravity = Gravity.CENTER
+        time.typeface = boldFont
+
+        val timeParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
-        textParams.bottomMargin = 60
+        timeParams.topMargin = 20
+        timeParams.bottomMargin = 20
 
-        // 🔘 BUTTON
-        val btn = Button(this)
-        btn.text = "Dismiss"
+        // 🔌 IMAGE (BIG)
+        val image = ImageView(this)
+        image.setImageResource(R.drawable.charger)
+        image.scaleType = ImageView.ScaleType.FIT_CENTER
 
-        val btnParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
+        val imgParams = LinearLayout.LayoutParams(600, 600)
+        imgParams.topMargin = 20
+        imgParams.bottomMargin = 40
+        imgParams.gravity = Gravity.CENTER
+
+        // 🔘 STOP BUTTON (Modern Style)
+        val stopBtn = Button(this)
+        stopBtn.text = "Stop Charging"
+        stopBtn.setTextColor(Color.WHITE)
+        stopBtn.textSize = 16f
+        stopBtn.typeface = boldFont
+        stopBtn.setBackgroundColor(Color.parseColor("#16a34a"))
+
+        val stopParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            140
         )
+        stopParams.marginStart = 30
+        stopParams.marginEnd = 30
+        stopParams.topMargin = 20
 
-        btn.setOnClickListener {
+        // 🔥 BUTTON ACTION
+        stopBtn.setOnClickListener {
             stopAlarm()
-            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            manager.cancel(1001)
 
-            finish()
+            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            manager.cancelAll()
+
             finish()
         }
 
-        layout.addView(text, textParams)
-        layout.addView(btn, btnParams)
+        // 📦 ADD VIEWS
+        root.addView(title)
+  
+        root.addView(image, imgParams)
+        root.addView(stopBtn, stopParams)
 
-        setContentView(layout)
+        setContentView(root)
     }
 
     private fun stopAlarm() {
@@ -75,9 +117,9 @@ class AlarmActivity : Activity() {
         mediaPlayer?.release()
         mediaPlayer = null
     }
+
     override fun onDestroy() {
         super.onDestroy()
         stopAlarm()
     }
-
 }

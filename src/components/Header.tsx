@@ -28,20 +28,21 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <SafeAreaView
       style={{
-        backgroundColor: Colors.primary,
-        paddingHorizontal: 10,
+        backgroundColor:"#ECECEC",
+        paddingHorizontal:10,
         paddingVertical: 8,
         gap: 5,
         alignItems: 'center',
         flexDirection: 'row',
+        // marginTop:20,
 
       }}>
-      <View style={{ flexDirection: 'row' }}>
+      <View style={{ flexDirection: 'row'  }}>
         {onBack ? (
           <Icon
             name="chevron-left"
             type="Entypo"
-            color={Colors.primary2}
+            color={Colors.Blue}
             size={26}
             onPress={onBack}
           />
@@ -92,8 +93,8 @@ const Header: React.FC<HeaderProps> = ({
         style={{
           flex: 1,
           alignItems: 'center',
-          fontSize:18,
-          color: Colors.white,
+          fontSize:20,
+          color: Colors.black,
           fontFamily:fontFamilyBold,
           
         }}>

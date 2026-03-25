@@ -1,179 +1,315 @@
-
 import {
+  Alert,
+  Image,
   NativeModules,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { Header, TextInput } from '../components';
-import { fontFamilyBold } from '../modules/themes';
+import React, { useEffect, useState, useRef } from 'react';
+import { Header, Icon, TextInput } from '../components';
+import { Colors, fontFamilyBold } from '../modules/themes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Animated, Easing } from 'react-native';
 
-const STORAGE_KEY = 'chargeAlert';
+const evcarlog = require('../assets/images/evcar.png');
 
+const STORAGE_KEY = 'timerAlert';
 const { AlarmModule } = NativeModules;
 
-
 const EvChargingTimeAlert = () => {
-  const [currentBattery, setCurrentBattery] = useState('');
+  const intervalRef = useRef<any>(null);
+  const animatedWidth = useRef(new Animated.Value(0)).current;
+
   const [hours, setHours] = useState('');
   const [minutes, setMinutes] = useState('');
+  const [remainingTime, setRemainingTime] = useState('00:00:00');
+  const [haserror, seterror] = useState(false);
 
-  const [liveBattery, setLiveBattery] = useState<number | null>(null);
-  const [remainingTime, setRemainingTime] = useState('');
+  const [progressbar, setprogress] = useState(0);
 
-  // 🚀 START CHARGING
-const startCharging = async () => {
-  const initial = Number(currentBattery);
-  const totalMinutes = Number(hours) * 60 + Number(minutes);
+  // 🚀 START TIMER
 
-  // ✅ validation
-  if (isNaN(initial) || initial <= 0 || initial >= 100) {
-    alert('Enter valid battery (1-99)');
-    return;
-  }
+  const startTimer = async () => {
+    // ✅ clear old timer
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
 
-  if (isNaN(totalMinutes) || totalMinutes <= 0) {
-    alert('Enter valid time');
-    return;
-  }
+    setRemainingTime('00:00:00'); // reset UI
 
-  const startTime = Date.now();
-  const endTime = startTime + totalMinutes * 60 * 1000;
+    const totalMinutes = Number(hours) * 60 + Number(minutes);
 
-  const data = {
-    startTime,
-    initialBattery: initial,
-    totalMinutes,
-    endTime,
+    if (isNaN(totalMinutes) || totalMinutes <= 0) {
+      // seterrormsg('Enter valid hours ');
+      seterror(true);
+      return;
+    }
+
+    if (totalMinutes <= 0.2) {
+      // setRemainingTime('Time Completed');
+      // seterrormsg('Enter valid Minutes');
+      seterror(true);
+
+      return;
+    }
+    seterror(false);
+    const endTime = Date.now() + totalMinutes * 60 * 1000;
+
+    const data = {
+      startTime: Date.now(),
+      endTime,
+    };
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    AlarmModule.showChargingNotification();
+    AlarmModule.setAlarm(endTime);
+
+    // ✅ start new interval
+    intervalRef.current = setInterval(() => {
+      updateTimer(data);
+    }, 1000);
+
+    updateTimer(data);
   };
 
-  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const resetTimer = async () => {
+    seterror(false);
 
-  // ✅ SET ALARM ONLY ONCE
-  AlarmModule.setAlarm(endTime);
+    setRemainingTime('00:00:00'); // reset UI
 
-  calculateLive(data);
-};
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    await AsyncStorage.removeItem(STORAGE_KEY);
+    AlarmModule.stopAlarm();
+  };
 
-  // 🔥 REAL CALCULATION
-const calculateLive = (data: any) => {
-  const now = Date.now();
+  // 🔥 COUNTDOWN LOGI
+  const updateTimer = (data: any) => {
+    const now = Date.now();
+    const remainingMs = data.endTime - now;
 
-  const elapsedMinutes = Math.max(
-    0,
-    (now - data.startTime) / 60000
-  );
+    if (remainingMs <= 0) {
+      setRemainingTime('00:00:00');
 
-  const remainingPercent = 100 - data.initialBattery;
-  const rate = remainingPercent / data.totalMinutes;
+      // ✅ stop interval when done
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
 
-  let battery =
-    data.initialBattery + rate * elapsedMinutes;
+      return;
+    }
 
-  battery = Math.min(100, Math.max(data.initialBattery, battery));
+    const totalSeconds = Math.floor(remainingMs / 1000);
 
-  const remainingMinutes = Math.max(
-    0,
-    data.totalMinutes - elapsedMinutes
-  );
+    const hrs = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
 
-  setLiveBattery(battery);
+    let timeString = '';
 
-  if (battery >= 100 || remainingMinutes <= 0) {
-    setRemainingTime('Fully Charged');
-  } else {
-    const hrs = Math.floor(remainingMinutes / 60);
-    const mins = Math.floor(remainingMinutes % 60);
+    if (hrs > 0) {
+      timeString = `${hrs}:${mins.toString().padStart(2, '0')}:${secs
+        .toString()
+        .padStart(2, '0')}`;
+    } else if (mins > 0) {
+      timeString = `${mins}:${secs.toString().padStart(2, '0')}s`;
+    } else {
+      timeString = `${secs}s`;
+    }
 
-    setRemainingTime(`${hrs}h ${mins}m left`);
-  }
-};
+    setRemainingTime(timeString);
+
+    const total = data.endTime - data.startTime;
+    const progress = ((total - remainingMs) / total) * 100;
+
+    Animated.timing(animatedWidth, {
+      toValue: progress,
+      duration: 800,
+      easing: Easing.linear,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const shineAnim = useRef(new Animated.Value(0)).current;
 
   // 🔄 LOAD + LIVE UPDATE
   useEffect(() => {
-    let interval: any;
+    // 🔥 START SHINE ANIMATION
+    Animated.loop(
+      Animated.timing(shineAnim, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      }),
+    ).start();
 
+    // 🔄 LOAD TIMER
     const init = async () => {
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
 
       if (stored) {
         const data = JSON.parse(stored);
 
-        calculateLive(data);
+        updateTimer(data);
 
-        // update every 5 sec
-        interval = setInterval(() => {
-          calculateLive(data);
-        }, 5000);
+        intervalRef.current = setInterval(() => {
+          updateTimer(data);
+        }, 1000);
       }
     };
 
     init();
 
+    // 🧹 CLEANUP
     return () => {
-      if (interval) clearInterval(interval);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
   }, []);
+
+  const translateX = shineAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-100, 300],
+  });
 
   return (
     <View style={styles.container}>
       <Header label="Charge Time Alert" />
 
       <View style={styles.content}>
+        <View style={{ width: '100%', height: 210, alignItems: 'center', backgroundColor: Colors.lGreen ,borderRadius:16}}>
+         
+          <Image
+            source={evcarlog}
+            style={{ width: '100%', height: 210, resizeMode: 'contain' }}
+          />
+        </View>
 
-        <TextInput
-          label="Current Battery %"
-          value={currentBattery}
-          placeholder="20"
-          onChangeText={setCurrentBattery}
-          keyboardType="numeric"
-        />
+        {/* <Text style={styles.label}>Enter time for charging Alert</Text> */}
 
         <View style={styles.row}>
           <TextInput
             label="Hours"
             value={hours}
-            placeholder="3"
+            placeholder="1"
             onChangeText={setHours}
             keyboardType="numeric"
             style={styles.input}
+            maxLength={2}
+            error={haserror}
+            errorMessage={'Enter valid hours'}
           />
 
           <TextInput
             label="Minutes"
             value={minutes}
-            placeholder="0"
+            placeholder="30"
             onChangeText={setMinutes}
             keyboardType="numeric"
             style={styles.input}
+            maxLength={3}
+            error={haserror}
+            errorMessage={'Enter valid minutes'}
           />
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={startCharging}>
-          <Text style={styles.buttonText}>Start Charging</Text>
-        </TouchableOpacity>
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: 10,
+            justifyContent: 'space-around',
+          }}
+        >
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: 'red' }]}
+            onPress={resetTimer}
+          >
+            <Text style={styles.buttonText}>Reset</Text>
+          </TouchableOpacity>{' '}
+          <TouchableOpacity style={styles.button} onPress={startTimer}>
+            <Text style={styles.buttonText}>Start Timer</Text>
+          </TouchableOpacity>
+        </View>
 
-        {/* LIVE RESULT */}
-        {liveBattery !== null && (
+        {/* Countdown */}
+        {remainingTime !== 'Set Timer' && (
           <View style={styles.resultBox}>
-            <Text style={styles.resultText}>
-              Battery: {liveBattery.toFixed(1)}%
-            </Text>
+            {/* Battery Header */}
 
-            <Text style={styles.resultText}>
-              {remainingTime}
-            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                // gap: 10,
+                justifyContent: 'center',
+                alignContent: 'center',
+              }}
+            >
+              <Icon
+                name={'electrical-services'}
+                type={'MaterialIcons'}
+                size={40}
+                color={Colors.primary2}
+              />
+              <Text style={styles.chargeTitle}>Charging In Progress..</Text>
+            </View>
 
-            {/* Progress Bar */}
-            <View style={styles.progressContainer}>
+            {/* Timer */}
+            <Text style={styles.timerText}>{remainingTime}</Text>
+
+            {/* Battery Bar */}
+
+            <View
+              style={{
+                width: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'row',
+              }}
+            >
+              <View style={styles.batteryContainer}>
+                {/* 🔋 Battery Fill */}
+                <Animated.View
+                  style={[
+                    styles.batteryFill,
+                    {
+                      width: animatedWidth.interpolate({
+                        inputRange: [0, 100],
+                        outputRange: ['5%', '110%'],
+                      }),
+                    },
+                  ]}
+                >
+                  <Icon
+                    name={'electric-bolt'}
+                    type={'MaterialIcons'}
+                    size={30}
+                    color={'gold'}
+                    style={{marginTop:20}}
+                  />
+
+                  {/* <View
+                    style={{ width: 10, height: 10, backgroundColor: 'red',
+                        alignItems: 'center',
+                        marginTop:20
+
+                     }}
+                  /> */}
+                </Animated.View>
+              </View>
               <View
-                style={[
-                  styles.progressFill,
-                  { width: `${liveBattery}%` },
-                ]}
+                style={{
+                  backgroundColor: 'black',
+                  width: 10,
+                  height: 35,
+                  alignSelf: 'center',
+                  marginTop: 15,
+                  borderTopRightRadius: 5,
+                  borderBottomRightRadius: 5,
+                }}
               />
             </View>
           </View>
@@ -185,11 +321,6 @@ const calculateLive = (data: any) => {
 
 export default EvChargingTimeAlert;
 
-
-
-
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -198,50 +329,89 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
+  shine: {
+    position: 'absolute',
+    width: 40,
+    height: '100%',
+    backgroundColor: 'red',
+    left: 0,
+  },
   row: {
     flexDirection: 'row',
     gap: 10,
     marginTop: 10,
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
   },
   input: {
-    width: 100,
+    width: 150,
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
   },
   button: {
-    marginTop: 20,
+    marginTop: 10,
     backgroundColor: '#16A34A',
-    padding: 14,
     borderRadius: 10,
     alignItems: 'center',
+    width: '45%',
+    height: 50,
+    justifyContent: 'center',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontFamily: fontFamilyBold,
   },
-  resultBox: {
-    marginTop: 20,
-    padding: 16,
-    backgroundColor: '#F1F5F9',
-    borderRadius: 10,
-  },
-  resultText: {
+  label: {
+    color: '#000',
     fontSize: 16,
-    marginBottom: 5,
+    fontFamily: fontFamilyBold,
+    marginTop: 20,
   },
-  progressContainer: {
-    height: 10,
-    backgroundColor: '#ddd',
-    borderRadius: 10,
+  resultBox: {
+    marginTop: 25,
+    padding: 20,
+    borderRadius: 16,
+    alignItems: 'center',
+    backgroundColor: '#ECECEC', // ✅ EV green
+    elevation: 10,
+    height: '40%',
+    borderColor: '#9e9e9e',
+    borderWidth: 1,
+  },
+
+  chargeTitle: {
+    color: Colors.primary2,
+    fontSize: 20,
+    marginBottom: 10,
+    fontFamily: fontFamilyBold,
+    marginTop: 0,
+    alignSelf: 'center',
+  },
+
+  timerText: {
+    fontSize: 50,
+    color: Colors.primary,
+    fontFamily: fontFamilyBold,
+  },
+
+  batteryContainer: {
+    width: '100%',
+    height: 70,
+    backgroundColor: '#fed7d7', // lighter gray
+    borderRadius: 12,
+    marginTop: 15,
     overflow: 'hidden',
-    marginTop: 10,
+    borderColor: '#9e9e9e',
+    borderWidth: 2,
   },
-  progressFill: {
+
+  batteryFill: {
     height: '100%',
-    backgroundColor: '#16A34A',
+    backgroundColor: '#22c55e', // brighter green
+   
+    borderTopRightRadius:14,
+    borderBottomRightRadius:14,
   },
 });
-
-function alert(arg0: string) {
-  throw new Error('Function not implemented.');
-}

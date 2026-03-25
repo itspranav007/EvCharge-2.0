@@ -1,12 +1,10 @@
-
-
 import { StyleSheet, Text, View, FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
+import { Header } from '../../components'
 import { useNavigation } from '@react-navigation/native'
-import { api } from '../modules/services';
-import { Header } from '../components';
+import { api } from '../../modules/services'
 
-const ChargingStations = () => {
+const ServiceCenter = () => {
 
   const navigation = useNavigation();
   const [showdata, setshowData] = useState([]);
@@ -71,7 +69,7 @@ setshowData(result.data)
   )
 }
 
-export default ChargingStations
+export default ServiceCenter
 
 const styles = StyleSheet.create({
 

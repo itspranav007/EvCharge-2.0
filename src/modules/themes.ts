@@ -23,6 +23,7 @@ type colorTheme = {
   buttonbackground: string;
   textColor: string;
   lGreen: string;
+  Blue:string;
 };
 
 const LightTheme: colorTheme = {
@@ -72,6 +73,7 @@ const darkTheme: colorTheme = {
   onBack: '#636363',
   buttonbackground: '#3170DE',
   textColor: '#636363',
+  
 };
 
 
@@ -100,6 +102,7 @@ export const Colors: colorTheme = {
   onBack: '#636363',
   buttonbackground: '#3170DE',
   textColor: '#636363',
+  Blue:'#3170DE',
 };
 
 
@@ -124,8 +127,10 @@ export const Size = {
   button: 35,
 };
 // export const fontFamily = 'PoppinsRegular';
+// export const fontFamilyBold = 'PoppinsBold';
 export const fontFamily = 'TitilliumWeb-Regular';
 export const fontFamilyBold = 'TitilliumWeb-SemiBold';
+
 
 
 export const GlobalStyle = StyleSheet.create({

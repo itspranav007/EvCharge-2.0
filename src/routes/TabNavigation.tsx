@@ -5,15 +5,18 @@ import { View, StyleSheet } from 'react-native';
 import {
   ChargingStations,
   EvChargingTimeAlert,
+  MoreScreen,
   VehicalProfile,
 } from '../screens';
 
 import { Icon } from '../components';
+import { Colors } from '../modules/themes';
 
 export type RootTabParamList = {
   Alert: undefined;
   CharginStation: undefined;
   Profile: undefined;
+  More: undefined;
 };
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -21,7 +24,7 @@ const Tab = createBottomTabNavigator<RootTabParamList>();
 const TabNavigation: React.FC = () => {
   return (
     <Tab.Navigator
-      initialRouteName="Alert"
+      initialRouteName="More"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarShowLabel: false,
@@ -39,6 +42,8 @@ const TabNavigation: React.FC = () => {
             iconName = 'ev-station';
           } else if (route.name === 'Profile') {
             iconName = 'account-circle';
+          } else if (route.name === 'More') {
+            iconName = 'reorder-horizontal';
           }
 
           return (
@@ -52,7 +57,7 @@ const TabNavigation: React.FC = () => {
                 name={iconName}
                 type={type}
                 size={24}
-                color={focused ? '#ffffff' : '#9ca3af'}
+                color={focused ? Colors.primary : '#0000'}
               />
             </View>
           );
@@ -62,6 +67,7 @@ const TabNavigation: React.FC = () => {
       <Tab.Screen name="Alert" component={EvChargingTimeAlert} />
       <Tab.Screen name="CharginStation" component={ChargingStations} />
       <Tab.Screen name="Profile" component={VehicalProfile} />
+      <Tab.Screen name="More" component={MoreScreen} />
     </Tab.Navigator>
   );
 };
@@ -78,14 +84,15 @@ const styles = StyleSheet.create({
     height: 60,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    backgroundColor: '#ffffff', // white base
-    borderTopWidth: 0,
+    backgroundColor: '#ECECEC', // white base
+    borderTopWidth: 2,
 
     // Shadow (iOS + Android)
     elevation: 8,
     shadowColor: '#000',
     shadowOpacity: 0.08,
     shadowRadius: 10,
+    
   },
 
   iconWrapper: {
@@ -98,9 +105,9 @@ const styles = StyleSheet.create({
   },
 
   activeWrapper: {
-    backgroundColor: '#16a34a', // EV green
-    transform: [{ scale: 1.1 }],
-    elevation: 5,
-    width: 70,
+   
+    // transform: [{ scale: 1.1 }],
+   
+    // width: 70,
   },
 });

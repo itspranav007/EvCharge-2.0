@@ -77,7 +77,10 @@ fun stopAlarm() {
                 channelId,
                 "Charging",
                 NotificationManager.IMPORTANCE_LOW
-            )
+            ).apply {
+                setSound(null, null) // 🔕 no sound
+                enableVibration(false)
+            }
             manager.createNotificationChannel(channel)
         }
 
@@ -85,7 +88,12 @@ fun stopAlarm() {
             .setSmallIcon(android.R.drawable.ic_lock_idle_charging)
             .setContentTitle("Vehicle Charging...")
             .setContentText("Charging in progress")
-            .setOngoing(true) // 🔥 important
+            .setOngoing(true) // 🔥 stays until removed
+            .setAutoCancel(false)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            // ❌ NO setContentIntent → no click action
             .build()
 
         manager.notify(2001, notification)
