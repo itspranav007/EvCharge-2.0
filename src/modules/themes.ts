@@ -23,13 +23,12 @@ type colorTheme = {
   buttonbackground: string;
   textColor: string;
   lGreen: string;
-  Blue:string;
+  bgcBlue:string;
 };
 
 const LightTheme: colorTheme = {
   primary: '#092B9C',
   primary2: '#3170DE',
-  secondary: '#F05A28',
   secondary2: '#50C1FF',
   background: '#F6F8FF',
   text: '#000000',
@@ -49,6 +48,7 @@ const LightTheme: colorTheme = {
   onBack: '#636363',
   buttonbackground: '#3170DE',
   textColor: '#636363',
+
 };
 const darkTheme: colorTheme = {
   primary: '#092B9C',
@@ -102,7 +102,8 @@ export const Colors: colorTheme = {
   onBack: '#636363',
   buttonbackground: '#3170DE',
   textColor: '#636363',
-  Blue:'#3170DE',
+  bgcBlue:'#EEF4FF',
+
 };
 
 
@@ -126,10 +127,10 @@ export const Size = {
   field: 40,
   button: 35,
 };
-// export const fontFamily = 'PoppinsRegular';
-// export const fontFamilyBold = 'PoppinsBold';
-export const fontFamily = 'TitilliumWeb-Regular';
-export const fontFamilyBold = 'TitilliumWeb-SemiBold';
+export const fontFamily = 'PoppinsRegular';
+export const fontFamilyBold = 'PoppinsBold';
+// export const fontFamily = 'TitilliumWeb-Regular';
+// export const fontFamilyBold = 'TitilliumWeb-SemiBold';
 
 
 

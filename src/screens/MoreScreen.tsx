@@ -10,32 +10,32 @@ const MoreScreen = () => {
   const navigation = useNavigation();
 
   const data = [
-    {
-      title: 'Service Center',
+    { 
+      title: ' Service Center',
       icon: 'gears',
       screen: 'ServiceCenter',
       type: 'FontAwesome',
     },
     {
-      title: 'EV News',
+      title: 'EV                         News',
       icon: 'newspaper-o',
       screen: 'EvNews',
       type: 'FontAwesome',
     },
     {
-      title: ' Smart Charge Reminder',
+      title: ' Smart Reminder',
       icon: 'notifications-active',
       screen: 'SmartChargingReminder',
       type: 'MaterialIcons',
     },
     {
-      title: 'Calculator',
+      title: 'Cost Calculator',
       icon: 'rupee',
       screen: 'CostCalculator',
       type: 'FontAwesome',
     },
     {
-      title: 'Help',
+      title: 'Help & Support',
       icon: 'face-agent',
       screen: 'EvHelp',
       type: 'MaterialCommunityIcons',
@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    gap:1,
   },
 
   card: {
@@ -141,6 +142,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#333',
     textAlign: 'center',
-    fontFamily: fontFamilyBold,
+    fontFamily: fontFamily,
+   flexShrink: 1,
+   paddingHorizontal:3.5,
+  //  marginTop: 4, 
   },
 });

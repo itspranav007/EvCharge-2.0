@@ -93,7 +93,7 @@ const Header: React.FC<HeaderProps> = ({
         style={{
           flex: 1,
           alignItems: 'center',
-          fontSize:20,
+          fontSize:Size.lg,
           color: Colors.black,
           fontFamily:fontFamilyBold,
           

@@ -3,6 +3,7 @@ import { View, StyleSheet, StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
+  ChargingStationDescriptive,
   ChargingStations,
   CostCalculator,
   Dashboard,
@@ -31,6 +32,7 @@ export type RootStackParamList = {
   SmartChargingReminder: undefined;
   EvNews: undefined;
   CostCalculator: undefined;
+  ChargingStationDescriptive:undefined
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -40,7 +42,7 @@ const Navigation: React.FC = () => {
     <NavigationContainer>
       {/* <StatusBar barStyle="light-content" backgroundColor="black" /> */}
 
-      <Stack.Navigator initialRouteName="DashboardTab">
+      <Stack.Navigator initialRouteName="SplashScreen">
         <Stack.Screen
           options={{ headerShown: false }}
           name="SplashScreen"
@@ -63,8 +65,8 @@ const Navigation: React.FC = () => {
         <Stack.Screen options={{ headerShown: false }} name="EvNews" component={EvNews} />
 
         <Stack.Screen options={{ headerShown: false }} name="CostCalculator" component={CostCalculator} />
-        {/* <Stack.Screen options={{ headerShown: false }} name="EvNews" component={EvNews} />
-        <Stack.Screen options={{ headerShown: false }} name="EvNews" component={EvNews} /> */}
+         <Stack.Screen options={{ headerShown: false }} name="ChargingStationDescriptive" component={ChargingStationDescriptive} />
+        {/* <Stack.Screen options={{ headerShown: false }} name="EvNews" component={EvNews} />  */}
 
 
 

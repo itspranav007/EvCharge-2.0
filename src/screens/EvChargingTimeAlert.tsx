@@ -9,12 +9,13 @@ import {
 } from 'react-native';
 import React, { useEffect, useState, useRef } from 'react';
 import { Header, Icon, TextInput } from '../components';
-import { Colors, fontFamilyBold } from '../modules/themes';
+import { Colors, fontFamily, fontFamilyBold, Size } from '../modules/themes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Animated, Easing } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import LottieView from 'lottie-react-native';
 
-const evcarlog = require('../assets/images/evcar.png');
+const evcarlog = require('../assets/images/charger.json');
 
 const STORAGE_KEY = 'timerAlert';
 const { AlarmModule } = NativeModules;
@@ -199,18 +200,21 @@ const screen = NativeModules?.InitialIntent?.screen;
   return (
     <View style={styles.container}>
             <Header label="Charge Time Alert" onBack={() => navigation.goBack()} />
+            {/* <Header2 label="Charge Time Alert" onBack={() => navigation.goBack()}/> */}
 
 
       <View style={styles.content}>
-        <View style={{ width: '100%', height: 210, alignItems: 'center', backgroundColor: Colors.lGreen ,borderRadius:16}}>
+        {/* <View style={{ width: '100%', height: 210, alignItems: 'center', backgroundColor: Colors.lGreen ,borderRadius:16}}>
          
-          <Image
-            source={evcarlog}
-            style={{ width: '100%', height: 210, resizeMode: 'contain' }}
-          />
-        </View>
+         <LottieView
+  source={evcarlog}
+  autoPlay
+  loop
+  style={{ width: 300, height: 300, }}
+/> 
+        </View> */}
 
-        {/* <Text style={styles.label}>Enter time for charging Alert</Text> */}
+        <Text style={styles.label}>Enter time for charging Alert</Text>
 
         <View style={styles.row}>
           <TextInput
@@ -273,8 +277,8 @@ const screen = NativeModules?.InitialIntent?.screen;
               <Icon
                 name={'electrical-services'}
                 type={'MaterialIcons'}
-                size={40}
-                color={Colors.primary2}
+                size={30}
+                color={Colors.primary}
               />
               <Text style={styles.chargeTitle}>Charging In Progress..</Text>
             </View>
@@ -312,31 +316,23 @@ const screen = NativeModules?.InitialIntent?.screen;
                     color={'gold'}
                     style={{marginTop:20}}
                   />
-
-                  {/* <View
-                    style={{ width: 10, height: 10, backgroundColor: 'red',
-                        alignItems: 'center',
-                        marginTop:20
-
-                     }}
-                  /> */}
                 </Animated.View>
               </View>
-              <View
-                style={{
-                  backgroundColor: 'black',
-                  width: 10,
-                  height: 35,
-                  alignSelf: 'center',
-                  marginTop: 15,
-                  borderTopRightRadius: 5,
-                  borderBottomRightRadius: 5,
-                }}
-              />
+              
             </View>
+               <LottieView
+  source={evcarlog}
+  autoPlay
+  loop
+  style={{ width: 350, height: 350,marginTop:-30 }}
+/> 
           </View>
+          
         )}
+        
+        
       </View>
+      
     </View>
   );
 };
@@ -387,25 +383,26 @@ const styles = StyleSheet.create({
   },
   label: {
     color: '#000',
-    fontSize: 16,
-    fontFamily: fontFamilyBold,
-    marginTop: 20,
+    fontSize: Size.lg,
+    fontFamily: fontFamily,
+    // marginTop: 20,
   },
   resultBox: {
     marginTop: 25,
     padding: 20,
     borderRadius: 16,
     alignItems: 'center',
-    backgroundColor: '#ECECEC', // ✅ EV green
+    backgroundColor:Colors.bgcBlue, // ✅ EV green
     elevation: 10,
-    height: '40%',
+    height: '50%',
     borderColor: '#9e9e9e',
     borderWidth: 1,
+    
   },
 
   chargeTitle: {
     color: Colors.primary2,
-    fontSize: 20,
+    fontSize:Size.lg,
     marginBottom: 10,
     fontFamily: fontFamilyBold,
     marginTop: 0,
@@ -413,19 +410,20 @@ const styles = StyleSheet.create({
   },
 
   timerText: {
-    fontSize: 50,
+    fontSize:40,
     color: Colors.primary,
     fontFamily: fontFamilyBold,
+    letterSpacing:1.5
   },
 
   batteryContainer: {
     width: '100%',
     height: 70,
-    backgroundColor: '#fed7d7', // lighter gray
+    backgroundColor: '#b5efb2bc', // lighter gray
     borderRadius: 12,
     marginTop: 15,
     overflow: 'hidden',
-    borderColor: '#000',
+    borderColor: '#6a6767',
     borderWidth:1.5,
   },
 

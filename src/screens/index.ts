@@ -4,6 +4,7 @@ import EvChargingTimeAlert from './EvChargingTimeAlert';
 import VehicalProfile from './VehicalProfile';
 
 import MoreScreen from './MoreScreen';
+import ChargingStationDescriptive from './MoreScreen/ChargingStationDescriptive';
 
 //More Screens
 import CostCalculator from './MoreScreen/CostCalculator';
@@ -23,4 +24,5 @@ export {
   EvHelp,
   SmartChargingReminder,
   EvNews,
+  ChargingStationDescriptive
 };
