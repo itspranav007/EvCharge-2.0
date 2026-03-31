@@ -8,8 +8,7 @@ import {
 } from 'react-native';
 import React from 'react';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Header } from '../../components';
+import { Header, Icon } from '../../components';
 import { fontFamily } from '../../modules';
 import { fontFamilyBold, Size } from '../../modules/themes';
 
@@ -119,17 +118,18 @@ const ChargingStationDescriptive = () => {
 
           <View style={styles.rowBetween}>
             <View style={styles.ratingRow}>
-              <Icon name="star" size={18} color="gold" />
-              <Icon name="star" size={18} color="gold" />
-              <Icon name="star" size={18} color="gold" />
-              <Icon name="star-half" size={18} color="gold" />
+              <Icon name="star" size={18} color="gold" type={'MaterialIcons'} />
+              <Icon name="star" size={18} color="gold" type={'MaterialIcons'} />
+              <Icon name="star" size={18} color="gold" type={'MaterialIcons'} />
+              <Icon name="star-half" size={18} color="gold" type={'MaterialIcons'} />
             </View>
 
             <TouchableOpacity style={styles.callBtn}>
               <Icon name="phone" size={20} color={'white'} type="FontAwesome" />
-
               <Text style={styles.callText}>Call</Text>
             </TouchableOpacity>
+
+            
           </View>
         </View>
 
@@ -298,12 +298,14 @@ const ChargingStationDescriptive = () => {
         </View> */}
 
         {/* ================= BUTTON ================= */}
-        {/* <TouchableOpacity style={styles.button} onPress={openMap}>
-          <Icon name="directions" size={22} color="#fff" />
-          <Text style={styles.buttonText}>Get Direction</Text>
-        </TouchableOpacity> */}
+
+        <TouchableOpacity style={[styles.button,{backgroundColor:'red',marginBottom:-15}]} onPress={()=>navigation.navigate('CostCalculator')}>
+          <Icon name="calculate" size={22} color="#fff" type={'MaterialIcons'} />
+          <Text style={styles.buttonText}>Cost Calculation</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.button} onPress={openMap}>
-          <Icon name="directions" size={22} color="#fff" />
+          <Icon name="direction" size={22} color="#fff" type={'Entypo'} />
           <Text style={styles.buttonText}>Get Direction</Text>
         </TouchableOpacity>
       </ScrollView>

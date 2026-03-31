@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({
           <Icon
             name="chevron-left"
             type="Entypo"
-            color={Colors.Blue}
+            color={Colors.primary}
             size={26}
             onPress={onBack}
           />

@@ -11,40 +11,44 @@ import { useNavigation } from '@react-navigation/native';
 import { api } from '../modules/services';
 import { Header } from '../components';
 import SearchBar from '../components/SearchBar';
-import { fontFamily, fontFamilyBold, Size } from '../modules/themes';
+import { Colors, fontFamily, fontFamilyBold, Size } from '../modules/themes';
+import LoadingIndicator from '../components/LoadingIndicator';
 
 const ChargerImage = require('../assets/images/C1.png');
 
 const ChargingStations = () => {
+
+const API_key =  'c33a04c0-edd2-4399-a302-f49d730e9796';
+
   const navigation = useNavigation();
   const [showdata, setshowData] = useState([]);
-      const [search, setSearch] = useState('');
+  const [search, setSearch] = useState('');
 
+  const [loading, setLoading] = useState(true);
 
   const getData = async () => {
+    setLoading(true);
     const result = await api.get('https://api.openchargemap.io/v3/poi/', {
       params: {
         output: 'json',
         countrycode: 'IN',
-        citycode: 'MH',
-        maxresults: 1000000,
-        key: 'c33a04c0-edd2-4399-a302-f49d730e9796',
+        town: 'Nagpur',
+        maxresults: 10,
+        key:API_key,
       },
     });
-console.log(result.data)
+    console.log(result.data);
     setshowData(result.data);
+    setLoading(false);
   };
 
   useEffect(() => {
     getData();
   }, []);
 
-
-    
-   const filteredData = showdata.filter((item) =>
-  item?.AddressInfo?.Town?.toLowerCase().includes(search.toLowerCase())
-);
-
+  const filteredData = showdata.filter(item =>
+    item?.AddressInfo?.Town?.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const renderItem = ({ item }: any) => {
     return (
@@ -62,19 +66,17 @@ console.log(result.data)
 
           <View style={{ flex: 1 }}>
             {/* TITLE */}
-           <View style={styles.titleRow}>
-  
-  <Text style={styles.title} numberOfLines={2}>
-    {item.AddressInfo?.Title || 'Unknown Station'}
-  </Text>
+            <View style={styles.titleRow}>
+              <Text style={styles.title} numberOfLines={2}>
+                {item.AddressInfo?.Title || 'Unknown Station'}
+              </Text>
 
-  {item.Connections?.[0]?.Level?.IsFastChargeCapable && (
-    <View style={styles.fastWrapper}>
-      <Text style={styles.fastChip}>⚡ Fast</Text>
-    </View>
-  )}
-
-</View>
+              {item.Connections?.[0]?.Level?.IsFastChargeCapable && (
+                <View style={styles.fastWrapper}>
+                  <Text style={styles.fastChip}>⚡ Fast</Text>
+                </View>
+              )}
+            </View>
 
             {/* ADDRESS */}
             <Text style={styles.subText}>
@@ -105,9 +107,7 @@ console.log(result.data)
 
           {/* COST */}
           <View style={styles.boxItem}>
-            <Text style={styles.boxTitle}>
-              {item.UsageCost || '--'}
-            </Text>
+            <Text style={styles.boxTitle}>{item.UsageCost || '--'}</Text>
             <Text style={styles.boxSub}>Per kWh</Text>
           </View>
 
@@ -120,32 +120,22 @@ console.log(result.data)
           </View>
         </View>
 
-
-
-
-
         {/* BUTTON */}
-       <TouchableOpacity
-  onPress={() =>
-    navigation.navigate('ChargingStationDescriptive', {item  })}
-    style={{ alignSelf: 'center',
-backgroundColor: '#b9cbf2',
-marginTop:10,
-paddingHorizontal: 110,
-paddingVertical:2,
-borderRadius: 6,
-
-
-
-     }}
-    >
-      
-  <Text style={styles.link}>Show More</Text>
-</TouchableOpacity>
-
-
-
-
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('ChargingStationDescriptive', { item })
+          }
+          style={{
+            alignSelf: 'center',
+            backgroundColor: '#b9cbf2',
+            marginTop: 10,
+            paddingHorizontal: 110,
+            paddingVertical: 2,
+            borderRadius: 6,
+          }}
+        >
+          <Text style={styles.link}>Show More</Text>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -157,15 +147,34 @@ borderRadius: 6,
       <View style={{ padding: 10 }}>
         <SearchBar
           value={search}
-          onChangeText={(text: string) => {setSearch(text)}}
+          onChangeText={(text: string) => {
+            setSearch(text);
+          }}
         />
 
-        <FlatList
-          data={filteredData}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={renderItem}
-          contentContainerStyle={{ padding: 12 }}
-        />
+        {loading ? (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: '50%',
+            }}
+          >
+            <LoadingIndicator size={50} color={Colors.primary} />
+          </View>
+        ) : (
+          <FlatList
+            data={filteredData}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={renderItem}
+          contentContainerStyle={{
+  padding: 12,
+  // paddingBottom:150, // ✅ important
+}}
+ListFooterComponent={<View style={{ height: 150 }} />}
+          />
+        )}
       </View>
     </View>
   );
@@ -177,18 +186,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F6F7FB',
-    marginBottom:140
   },
 
   card: {
     backgroundColor: '#FFFFFF',
     padding: 12,
     borderRadius: 14,
-    marginBottom:10,
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: '#EAEAEA',
     elevation: 3,
-    height: "auto",
+    height: 'auto',
   },
 
   topRow: {
@@ -208,7 +216,6 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilyBold,
     color: '#111',
     flexShrink: 1,
-    
   },
 
   subText: {
@@ -252,33 +259,32 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#6B7280',
     marginTop: 2,
-        fontFamily: fontFamily,
-
-
+    fontFamily: fontFamily,
   },
 
- titleRow: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-},
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
 
-fastWrapper: {
-  backgroundColor: '#DCFCE7',
-  borderRadius: 6,
-  paddingHorizontal: 6,
-  paddingVertical: 3,
-  marginLeft: 8,
-},
+  fastWrapper: {
+    backgroundColor: '#DCFCE7',
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    marginLeft: 8,
+  },
 
-fastChip: {
-  fontSize: 10,
-  color: '#16A34A',
-  fontFamily: fontFamilyBold,
-},
+  fastChip: {
+    fontSize: 10,
+    color: '#16A34A',
+    fontFamily: fontFamilyBold,
+  },
   link: {
     marginTop: 5,
     color: '#0b54f3',
     fontSize: 13,
-    fontFamily: fontFamilyBold,},
+    fontFamily: fontFamilyBold,
+  },
 });

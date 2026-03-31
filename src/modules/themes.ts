@@ -141,7 +141,7 @@ export const GlobalStyle = StyleSheet.create({
     fontWeight: '500',
     paddingLeft: 8,
     lineHeight: 16,
-    color: '#636363',
+    color: '#070707',
   },
   errorMessage: {
     fontFamily: fontFamily,

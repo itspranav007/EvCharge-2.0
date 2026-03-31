@@ -1,6 +1,8 @@
-import React, {useEffect} from 'react';
-import {View, StyleSheet, Animated, Easing} from 'react-native';
+import React, {useEffect, useRef} from 'react';
+import {View, StyleSheet, Animated, Easing, Image} from 'react-native';
 import {useTheme} from '../modules';
+import {  Colors } from '../modules/themes';
+
 
 interface LoadingIndicatorProps {
   size?: number;
@@ -8,96 +10,77 @@ interface LoadingIndicatorProps {
 }
 
 const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
-  size = 40,
-  color,
+  size = 50,
+  color = Colors.primary,
 }) => {
   const colors = useTheme();
-  const spinValue = new Animated.Value(0);
+  const spinValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const startAnimation = () => {
-      spinValue.setValue(0);
-      Animated.loop(
-        Animated.timing(spinValue, {
-          toValue: 1,
-          duration: 1000,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-      ).start();
-    };
-
-    startAnimation();
-    return () => {
-      spinValue.setValue(0);
-    };
+    Animated.loop(
+      Animated.timing(spinValue, {
+        toValue: 1,
+        duration: 1200,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    ).start();
   }, []);
 
-  const spin = spinValue.interpolate({
+  const rotate = spinValue.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
   });
 
+  const dotSize = size * 0.15;
+  const radius = size / 2;
+
+  const dots = Array.from({length: 8});
+
   return (
     <View style={styles.container}>
       <Animated.View
-        style={[
-          styles.spinner,
-          {
-            width: size,
-            height: size,
-            borderColor: color || colors.primary,
-            transform: [{rotate: spin}],
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.innerSpinner,
-          {
-            width: size * 0.85,
-            height: size * 0.85,
-            backgroundColor: '#fff',
-          },
-        ]}
-      />
-      <View
-        style={[
-          styles.dot,
-          {
-            width: size * 0.15,
-            height: size * 0.15,
-            backgroundColor: color || colors.primary,
-            top: 0,
-            left: size * 0.425,
-          },
-        ]}
-      />
+        style={{
+          width: size,
+          height: size,
+          transform: [{rotate}],
+        }}>
+        {dots.map((_, index) => {
+          const angle = (index * 360) / dots.length;
+          const rad = (angle * Math.PI) / 180;
+
+          const x = radius + radius * 0.75 * Math.cos(rad) - dotSize / 2;
+          const y = radius + radius * 0.75 * Math.sin(rad) - dotSize / 2;
+
+          return (
+            <View
+              key={index}
+              style={{
+                position: 'absolute',
+                width: dotSize,
+                height: dotSize,
+                borderRadius: dotSize,
+                backgroundColor: color || colors.primary,
+                left: x,
+                top: y,
+                opacity: 0.3 + (index / dots.length),
+              }}
+            >
+      
+     </View>
+          );
+        })}
+      </Animated.View>
+         
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  spinner: {
-    borderWidth: 2,
-    borderRadius: 100,
-    borderStyle: 'solid',
-    borderTopColor: 'transparent',
-    borderRightColor: 'transparent',
-    position: 'absolute',
-  },
-  innerSpinner: {
-    position: 'absolute',
-    borderRadius: 100,
-  },
-  dot: {
-    position: 'absolute',
-    borderRadius: 100,
+    // justifyContent: 'center',
+    // alignItems: 'center',
+    flex:1
   },
 });
 

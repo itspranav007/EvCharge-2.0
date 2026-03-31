@@ -42,7 +42,7 @@ const Navigation: React.FC = () => {
     <NavigationContainer>
       {/* <StatusBar barStyle="light-content" backgroundColor="black" /> */}
 
-      <Stack.Navigator initialRouteName="SplashScreen">
+      <Stack.Navigator initialRouteName="DashboardTab">
         <Stack.Screen
           options={{ headerShown: false }}
           name="SplashScreen"

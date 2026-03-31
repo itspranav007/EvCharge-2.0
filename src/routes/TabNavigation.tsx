@@ -24,7 +24,7 @@ const Tab = createBottomTabNavigator<RootTabParamList>();
 const TabNavigation: React.FC = () => {
   return (
     <Tab.Navigator
-      initialRouteName="Alert"
+      initialRouteName="More"
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarShowLabel: false,
